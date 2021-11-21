@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "/Users/albinost/.dotnet/store/|arch|/|tfm|",
+      "/Users/albinost/.nuget/packages"
+    ]
+  }
+}
