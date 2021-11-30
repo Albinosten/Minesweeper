@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-
+using System;
 namespace Minesweeper
 {
     public class MenuBar
@@ -13,7 +13,7 @@ namespace Minesweeper
         }
 
         private float TotalGameTime;
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont spriteFont, int numberOfBombsLeft)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont spriteFont, int numberOfBombs,int numberOfBombsLeft, int numberOfDeaths)
         {
             this.TotalGameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -23,11 +23,20 @@ namespace Minesweeper
 
             spriteBatch.DrawString(spriteFont, " " + (int)this.TotalGameTime + " ", bar, Color.Black);
 
-            var secondColumn = new Vector2(this.texture.Width/3, this.texture.YPos);
+            var secondColumn = new Vector2(this.texture.Width/4, this.texture.YPos);
             spriteBatch.DrawString(spriteFont, " " + numberOfBombsLeft + " ", secondColumn, Color.Black);    
 
-            var thirdColumn = new Vector2(this.texture.Width/3*2, this.texture.YPos);
-            spriteBatch.DrawString(spriteFont, " " + "apa" + " ", thirdColumn, Color.Black);    
+            var thirdColumn = new Vector2(this.texture.Width/4*2, this.texture.YPos);
+            spriteBatch.DrawString(spriteFont, " " +  + numberOfDeaths + " ", thirdColumn, Color.Black);    
+                        
+            var forthColumn = new Vector2(this.texture.Width/4*3, this.texture.YPos);
+            decimal deathscore = this.GetDeathScore(numberOfDeaths,numberOfBombs);
+            //Console.WriteLine("deathscore " +deathscore);
+            spriteBatch.DrawString(spriteFont, "death score: " +  deathscore  + "% ", forthColumn, Color.Black);    
+        }
+        public int GetDeathScore(decimal numberOfDeaths, decimal numberOfBombs)
+        {
+            return (int)(100*(numberOfDeaths/numberOfBombs));
         }
     }
 }

@@ -35,7 +35,12 @@ namespace Minesweeper
         }
         public int GetNumberOfBombLeft(GameContext context)
         {
+            //kan köras utan gamecontext om man kollar på tile.isbomb but whaatever.
             return Math.Max(context.NumberOfBombs - this.tiles.Count(x => x.IsFlaggedAsBomb || x.IsExploded), 0);
+        }
+        public int NumberOfDeaths()
+        {
+            return this.tiles.Count(x => x.IsExploded);
         }
         public void SelectTile(ITile tile)
         {
@@ -69,7 +74,7 @@ namespace Minesweeper
         public void FlagAsBomb(int xPos, int yPos,GameContext context)
         {
             var tile = this.GetSelectedTile(xPos,yPos,context);
-            tile.TobbleRightClick();
+            tile.ToggleRightClick();
         }
         public void ToggleAll()
         {

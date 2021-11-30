@@ -12,13 +12,15 @@ namespace Minesweeper
         bool IsFlaggedAsBomb { get; }
         bool IsExploded { get; }
         bool IsToggled { get; }
-        int GetNumberOfBombNeighbours();
-        int? GetProbabilityToBeABomb();
+        decimal GetNumberOfBombNeighbours();
+        decimal? GetProbabilityToBeABomb();
         void SetProbabilityToBeABomb(int percentile);
         void SetNumberOfBombNeighbours(int number);
         void InitializeBomb();
         void Select();
         void FlagAsBomb();
+        void MarkAsTotalySafe();
+        void ResetProbability();
         IList<int> NeighbourIndexes{get;}
         int MyIndex {get;set;}
 
@@ -26,8 +28,8 @@ namespace Minesweeper
 
     public class Tile : ITile
     {
-        public static int s_width => 35;
-        public static int s_Height => 35;
+        public static int s_width => 25;
+        public static int s_Height => 25;
         public float XPos => this.Rectangle.XPos;
         public float YPos => this.Rectangle.YPos;
         private IPositionalTexture2D Rectangle;
@@ -47,23 +49,29 @@ namespace Minesweeper
         public IList<int> NeighbourIndexes{get;set;}
         public int MyIndex {get;set;}
         public int NumberOfBombNeighbours {get;set;}
-        private int ProbabilityToBeABomb{get;set;}
+        private int? ProbabilityToBeABomb{get;set;}
         public void SetProbabilityToBeABomb(int percentile)
         {
-            if(this.ProbabilityToBeABomb < percentile)
+            if(this.ProbabilityToBeABomb < percentile || !this.ProbabilityToBeABomb.HasValue)
             {
                 this.ProbabilityToBeABomb = percentile;
             }
         }
-        public int? GetProbabilityToBeABomb()
+        private bool totalySafe;
+        public void MarkAsTotalySafe()
         {
-            if(this.ProbabilityToBeABomb < 0)
+            //Console.WriteLine("Marked as totaly safe. index: "  + this.MyIndex);
+            this.totalySafe = true;
+        }
+        public decimal? GetProbabilityToBeABomb()
+        {
+            if(this.totalySafe)
             {
-                return null;
+                return decimal.Zero;
             }
             return this.ProbabilityToBeABomb;
         }
-        public int GetNumberOfBombNeighbours()
+        public decimal GetNumberOfBombNeighbours()
         {
             if(this.IsToggled)
             {
@@ -74,7 +82,6 @@ namespace Minesweeper
         public Tile(GraphicsDeviceManager graphics)
         {
             this.graphics = graphics;
-            this.ProbabilityToBeABomb = -1;
         }
         public void Initialize(int startY, int startX, int yOffset)
         {
@@ -95,8 +102,11 @@ namespace Minesweeper
 
             if(this.IsToggled)
             {
-                spriteBatch.DrawString(spriteFont, " " + this.NumberOfBombNeighbours + " ", topVector, Color.Black);
+                spriteBatch.DrawString(spriteFont, " " + this.NumberOfBombNeighbours, topVector, Color.Black);
             }
+            
+            spriteBatch.DrawString(spriteFont, " " + this.ProbabilityToBeABomb, new Vector2(this.Rectangle.XPos, this.Rectangle.YPos+20), Color.Black);
+
         }
 
         public void Select()
@@ -119,7 +129,7 @@ namespace Minesweeper
         }
 
         public bool IsFlaggedAsBomb{get;private set;}
-        public void TobbleRightClick()
+        public void ToggleRightClick()
         {
             if(!this.IsToggled && !this.IsExploded)
             {
@@ -129,6 +139,7 @@ namespace Minesweeper
         }
         public void FlagAsBomb()
         {
+            Console.WriteLine("flagged as bomb. index " + this.MyIndex);
             this.IsFlaggedAsBomb = true;
             this.SetColor(this.FlaggedColors);
         }
@@ -144,6 +155,10 @@ namespace Minesweeper
         public void SetNumberOfBombNeighbours(int number)
         {
             this.NumberOfBombNeighbours = number;
+        }
+        public void ResetProbability()
+        {
+            this.ProbabilityToBeABomb = null;
         }
         public void SetColor(ColorOption color)
         {

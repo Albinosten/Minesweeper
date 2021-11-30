@@ -21,14 +21,80 @@ namespace Minesweeper
         }
         public void SolveNext(GameContext gameContext)
         {
-            var allTiles = this.TileHandler
+            var allHiddenTiles = this.TileHandler
             .GetTilesInterface()
-            .ToList()
+            .Where(x => !x.IsToggled && !x.IsFlaggedAsBomb && !x.IsExploded)
             ;
 
-            foreach(var tile in allTiles.Where(x => x.IsToggled))
+            //reset calculated probability
+            this.ResetCalculatedProbability();
+
+            //calculate probability
+            this.CalculateProbabilityAndMarkAsBomb();
+
+            var relevantTiles = allHiddenTiles 
+                .Where(x => x.GetProbabilityToBeABomb().HasValue)
+                ;
+
+
+            var totalySafeTile = relevantTiles
+                .FirstOrDefault(x => x.GetProbabilityToBeABomb() < decimal.One);
+            if(totalySafeTile != null)
             {
-                float numberOfBombNeighbours = tile.GetNumberOfBombNeighbours();
+                Console.WriteLine("totaly safe tile: " + totalySafeTile.GetProbabilityToBeABomb());
+
+                totalySafeTile.Select();
+            }
+            else
+            {
+                var bombsLeft = (decimal)this.TileHandler.GetNumberOfBombLeft(gameContext);
+                var probabilityOfRandomTile = 100 * (bombsLeft /this.DontDivideByZero( allHiddenTiles.Count()));
+                
+                var lowestProbabilityTile = relevantTiles
+                    .Where(x => x.GetProbabilityToBeABomb().HasValue)
+                    .OrderBy(x => x.GetProbabilityToBeABomb())
+                    .FirstOrDefault();
+
+                if(probabilityOfRandomTile < (lowestProbabilityTile?.GetProbabilityToBeABomb() ?? 100))
+                {
+                    Console.WriteLine("Jumping to a random tile with probability: " + probabilityOfRandomTile);
+
+                    var tile = this.GetRandomTile(this.TileHandler
+                        .GetTilesInterface()
+                        .Where(x => !x.GetProbabilityToBeABomb().HasValue)
+                        .Where(x => !x.IsFlaggedAsBomb)
+                        .Where(x => !x.IsToggled)
+                        .ToList());
+
+                    tile.Select();
+
+                }
+                else
+                {
+                    //lowest probabilityTile
+                    Console.WriteLine("lowest probability tile with probability: " + probabilityOfRandomTile);
+
+                    lowestProbabilityTile.Select();
+                }
+            }
+        }
+        private decimal DontDivideByZero(decimal value)
+        {
+            if(value == decimal.Zero)
+            {
+                return decimal.One;
+            }
+            return value;
+        }        
+        private void CalculateProbabilityAndMarkAsBomb()
+        {
+            var allTiles = this.TileHandler
+                .GetTilesInterface()
+                .ToList();
+
+            foreach(var tile in allTiles.Where(x => x.IsToggled && !x.IsFlaggedAsBomb))
+            {
+                var numberOfBombNeighbours = tile.GetNumberOfBombNeighbours();
 
                 var hiddenNeighbours = new List<ITile>();
                 foreach(var tileIndex in tile.NeighbourIndexes)
@@ -38,48 +104,38 @@ namespace Minesweeper
                     {
                         hiddenNeighbours.Add(neighbourTile);
                     }
+                    if(neighbourTile.IsFlaggedAsBomb || neighbourTile.IsExploded)
+                    {
+                        numberOfBombNeighbours--;
+                    }
                 }
 
                 foreach(var neighbour in hiddenNeighbours)
                 {
                     var a = 100*(numberOfBombNeighbours / hiddenNeighbours.Count);
                     neighbour.SetProbabilityToBeABomb((int)a);
+                    if(a > 99)
+                    {
+                        neighbour.FlagAsBomb();
+                    }
+                    if(a < 1)
+                    {
+                        neighbour.MarkAsTotalySafe();
+                    }
                 }
             }
-
-            
-            //Flag bomb
-            allTiles
-                .Where(x => x.GetProbabilityToBeABomb() == 100)
-                .Select(x => 
-                {
-                     x.FlagAsBomb();
-                     return true;
-                });
-
-
-            var relevantTiles = allTiles 
-                .Where(x => !x.IsToggled && !x.IsFlaggedAsBomb)
-                .Where(x => x.GetProbabilityToBeABomb() != null)
-                ;
-
-            var nextTile = relevantTiles.FirstOrDefault(x => x.GetNumberOfBombNeighbours() == 0);
-            if(nextTile != null)
+        }
+        private void ResetCalculatedProbability()
+        {
+            foreach(var tile in this.TileHandler.GetTilesInterface())
             {
-                nextTile.Select();
+                tile.ResetProbability();
             }
-            else
-            {
-                float bombsLeft = (float)this.TileHandler.GetNumberOfBombLeft(gameContext);
-                float probabilityOfRandomTile = 100 * (bombsLeft / allTiles
-                    .Where(x => x.GetProbabilityToBeABomb() == null)
-                    .Count());
-                
-                var lowestProbability = relevantTiles
-                    .Select(x => x.GetNumberOfBombNeighbours())
-                    .OrderBy(x => x)
-                    .First();
-            }
+        }
+        private ITile GetRandomTile(IList<ITile> tiles)
+        {
+            var index = this.GetRandomNumber(tiles.Count);
+            return tiles[index];
         }
         private int GetRandomNumber(int max)
         {

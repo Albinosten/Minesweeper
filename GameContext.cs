@@ -11,5 +11,6 @@ namespace Minesweeper
         public int Height{get;set;}
         public int NumberOfBombs {get;set;}
         public int TotalTiles => this.Width * this.Height;
+        
     }
 }

@@ -19,8 +19,11 @@ namespace Minesweeper
         public MinesweeperSolver MinesweeperSolver {get;private set;}
 
         public GameContext GameContext {get; set;}
-        private static float s_LockedTime => 0.8f;
+        // private static float s_LockedTime => 0.2f;
+        private static float s_LockedTime => 0f;
         public bool DebugUpdateAllTiles{get;set;}
+        public bool SimmulateOnly{get;set;}
+        
         public MinesweeperGame(TileHandler tileHandler, MenuBarFactory menuBarFactory,MinesweeperSolverFactory minesweeperSolverFactory)
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -38,9 +41,18 @@ namespace Minesweeper
             this.TileHandler.CreateTiles(this.GameContext, this._graphics, MenuBar.s_Height);
             this.MinesweeperSolver = this.MinesweeperSolverFactory.Create(this.TileHandler);
 
-            this._graphics.PreferredBackBufferHeight = this.GameContext.Height*Tile.s_Height+MenuBar.s_Height;
-            this._graphics.PreferredBackBufferWidth = this.GameContext.Width*Tile.s_width;
-            this._graphics.ApplyChanges();
+            if(!this.SimmulateOnly)
+            {
+                this._graphics.PreferredBackBufferHeight = this.GameContext.Height*Tile.s_Height+MenuBar.s_Height;
+                this._graphics.PreferredBackBufferWidth = this.GameContext.Width*Tile.s_width;
+                this._graphics.ApplyChanges();
+            }
+            else
+            {
+                this._graphics.PreferredBackBufferHeight = 40;
+                this._graphics.PreferredBackBufferWidth = 200;
+                this._graphics.ApplyChanges();
+            }
 
             base.Initialize();
         }
@@ -104,6 +116,18 @@ namespace Minesweeper
                     this.LockMouseClick();
                 }
             }
+            if(this.SimmulateOnly)
+            {
+                if(this.TileHandler.GetNumberOfBombLeft(this.GameContext)==0)
+                {
+                    Console.WriteLine("End of sim, bombs wrongly exploded is: " + this.MenuBar.GetDeathScore(this.TileHandler.NumberOfDeaths(), this.GameContext.NumberOfBombs) + " %");
+                    this.Exit();
+                }
+                else
+                {
+                    this.MinesweeperSolver.SolveNext(GameContext);
+                }
+            }
 
             if(this.DebugUpdateAllTiles && gameTime.TotalGameTime.Seconds > 3 && this.isFirstTime)
             {
@@ -120,11 +144,23 @@ namespace Minesweeper
 
         protected override void Draw(GameTime gameTime)
         {
+            if(this.SimmulateOnly)
+            {
+                return;
+            }
+
+
             this.GraphicsDevice.Clear(Color.CornflowerBlue);
 
             this._spriteBatch.Begin();
             
-            this.MenuBar.Draw(gameTime, this._spriteBatch, this.spriteFont, this.TileHandler.GetNumberOfBombLeft(this.GameContext));
+            this.MenuBar.Draw(gameTime
+                , this._spriteBatch
+                , this.spriteFont
+                , this.GameContext.NumberOfBombs
+                , this.TileHandler.GetNumberOfBombLeft(this.GameContext)
+                , this.TileHandler.NumberOfDeaths()
+                );
             this.TileHandler.Draw(gameTime, this._spriteBatch, this.spriteFont);
 
             this._spriteBatch.End();
