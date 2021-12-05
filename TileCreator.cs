@@ -47,7 +47,7 @@ namespace  Minesweeper
                         DarkRedColors = darkRedColor,
                         
                     };
-                    tile.Initialize(i,j, menuHeight);
+                    tile.Initialize(i,j, menuHeight, context);
                     tile.NeighbourIndexes = this.tileNeighbourCounter.GetNeighbourIndexes(j,i,context);
 
                     result.Add(tile);
@@ -58,7 +58,10 @@ namespace  Minesweeper
             var indexOfBombs = this.GetIndexOfBombs(context);
             foreach(var i in indexOfBombs.OrderBy(x=>x))
             {
-                Console.WriteLine(" bomb is: " + i);
+                if(context.DebugOutput)
+                {
+                    Console.WriteLine(" bomb is: " + i);
+                }
                 result[i].InitializeBomb();   
             }
 

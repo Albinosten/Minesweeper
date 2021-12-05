@@ -19,12 +19,12 @@ namespace Minesweeper
 
             try
             {
-                Console.WriteLine($"working on {type.Name} ");
+                //Console.WriteLine($"working on {type.Name} ");
 
                 ConstructorInfo[] constructorInfoObjs = type.GetConstructors();
                 if(constructorInfoObjs != null)
                 {
-                    Console.WriteLine($"The constructor of {type.Name} is: ");
+                    //Console.WriteLine($"The constructor of {type.Name} is: ");
                     foreach(var constructorInfoObj in constructorInfoObjs)
                     {
                         var parameters = constructorInfoObj.GetParameters();
@@ -32,14 +32,14 @@ namespace Minesweeper
                         var parameterObjects = new List<Object>();
                         foreach(var parameter in parameters)
                         {
-                            Console.WriteLine(parameter.ParameterType);
+                            //Console.WriteLine(parameter.ParameterType);
 
                             var parameterObject = this.Create(parameter.ParameterType);
                             parameterObjects.Add(parameterObject);
                         }
                         results.Add(constructorInfoObj.Invoke(parameterObjects.ToArray()));
 
-                        Console.WriteLine(constructorInfoObj.ToString());
+                        //Console.WriteLine(constructorInfoObj.ToString());
                     }
                 }
                 else

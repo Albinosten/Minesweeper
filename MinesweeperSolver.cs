@@ -24,7 +24,13 @@ namespace Minesweeper
             var allHiddenTiles = this.TileHandler
             .GetTilesInterface()
             .Where(x => !x.IsToggled && !x.IsFlaggedAsBomb && !x.IsExploded)
+            .ToList()
             ;
+
+            if(!allHiddenTiles.Any())
+            {
+                return;
+            }
 
             //reset calculated probability
             this.ResetCalculatedProbability();
@@ -41,9 +47,12 @@ namespace Minesweeper
                 .FirstOrDefault(x => x.GetProbabilityToBeABomb() < decimal.One);
             if(totalySafeTile != null)
             {
-                Console.WriteLine("totaly safe tile: " + totalySafeTile.GetProbabilityToBeABomb());
-
-                totalySafeTile.Select();
+                if(gameContext.DebugOutput)
+                {
+                    Console.WriteLine("totaly safe tile: " + totalySafeTile.GetProbabilityToBeABomb());
+                }
+                this.TileHandler.SelectTile(totalySafeTile);
+                // totalySafeTile.Select();
             }
             else
             {
@@ -57,26 +66,50 @@ namespace Minesweeper
 
                 if(probabilityOfRandomTile < (lowestProbabilityTile?.GetProbabilityToBeABomb() ?? 100))
                 {
-                    Console.WriteLine("Jumping to a random tile with probability: " + probabilityOfRandomTile);
+                    if(gameContext.DebugOutput)
+                    {
+                        Console.WriteLine("Jumping to a random tile with probability: " + probabilityOfRandomTile);
+                    }
 
-                    var tile = this.GetRandomTile(this.TileHandler
-                        .GetTilesInterface()
-                        .Where(x => !x.GetProbabilityToBeABomb().HasValue)
-                        .Where(x => !x.IsFlaggedAsBomb)
-                        .Where(x => !x.IsToggled)
-                        .ToList());
+                    // var tiles = this.TileHandler
+                    //     .GetTilesInterface()
+                    //     .Where(x => !x.GetProbabilityToBeABomb().HasValue)
+                    //     .Where(x => !x.IsFlaggedAsBomb)
+                    //     .Where(x => !x.IsToggled)
+                    //     .ToList();
+                    var tiles = allHiddenTiles;
 
-                    tile.Select();
+                    if(tiles.Any())//DEnna blir tom ibland, även fast det blir en probabilityOfRandomTile. 
+                    //anledningen är att denna filtrerar bort för många. alternativt att den räkar ut probabilityn för högt
+                    {
+                        // tile.Select();
+                        var tile = this.GetRandomTile(tiles);
+                        this.TileHandler.SelectTile(tile);
+                    }
+                    else
+                    {
+                        Console.WriteLine("hittade ingen random tile. probability = " + probabilityOfRandomTile);
+                        this.SelectLowestProbabilityTile(gameContext, lowestProbabilityTile);
+                    }
+
 
                 }
                 else
                 {
                     //lowest probabilityTile
-                    Console.WriteLine("lowest probability tile with probability: " + probabilityOfRandomTile);
-
-                    lowestProbabilityTile.Select();
+                    this.SelectLowestProbabilityTile(gameContext, lowestProbabilityTile);
                 }
             }
+        }
+        private void SelectLowestProbabilityTile(GameContext gameContext, ITile lowestProbabilityTile)
+        {
+            if(gameContext.DebugOutput)
+            {
+                Console.WriteLine("lowest probability tile with probability: " + lowestProbabilityTile.GetProbabilityToBeABomb());
+            }
+
+            // lowestProbabilityTile.Select();
+            this.TileHandler.SelectTile(lowestProbabilityTile);
         }
         private decimal DontDivideByZero(decimal value)
         {
@@ -135,6 +168,7 @@ namespace Minesweeper
         private ITile GetRandomTile(IList<ITile> tiles)
         {
             var index = this.GetRandomNumber(tiles.Count);
+
             return tiles[index];
         }
         private int GetRandomNumber(int max)

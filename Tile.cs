@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Content;
 
 namespace Minesweeper
 {
@@ -34,6 +32,7 @@ namespace Minesweeper
         public float YPos => this.Rectangle.YPos;
         private IPositionalTexture2D Rectangle;
         private GraphicsDeviceManager graphics;
+        private GameContext gameContext;
         public  Color[] NormalColors { get; set; }
         public  Color[] ToggledColors{ get; set; }
         public  Color[] FlaggedColors{ get; set; }
@@ -60,7 +59,6 @@ namespace Minesweeper
         private bool totalySafe;
         public void MarkAsTotalySafe()
         {
-            //Console.WriteLine("Marked as totaly safe. index: "  + this.MyIndex);
             this.totalySafe = true;
         }
         public decimal? GetProbabilityToBeABomb()
@@ -83,7 +81,7 @@ namespace Minesweeper
         {
             this.graphics = graphics;
         }
-        public void Initialize(int startY, int startX, int yOffset)
+        public void Initialize(int startY, int startX, int yOffset, GameContext gameContext)
         {
             var rectange = new Texture2D(this.graphics.GraphicsDevice, s_width, s_Height);
             rectange.SetData(this.NormalColors);
@@ -93,6 +91,8 @@ namespace Minesweeper
                 XPos = startX*s_Height, 
                 YPos = startY*s_width + yOffset,
             };
+
+            this.gameContext = gameContext;
         }
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont spriteFont)
         {   
@@ -105,7 +105,8 @@ namespace Minesweeper
                 spriteBatch.DrawString(spriteFont, " " + this.NumberOfBombNeighbours, topVector, Color.Black);
             }
             
-            spriteBatch.DrawString(spriteFont, " " + this.ProbabilityToBeABomb, new Vector2(this.Rectangle.XPos, this.Rectangle.YPos+20), Color.Black);
+            //Probability to be bomb
+            //spriteBatch.DrawString(spriteFont, " " + this.ProbabilityToBeABomb, new Vector2(this.Rectangle.XPos, this.Rectangle.YPos+20), Color.Black);
 
         }
 
@@ -117,7 +118,10 @@ namespace Minesweeper
             }
             else if(this.IsBomb)
             {
-                Console.WriteLine("You died");
+                if(this.gameContext.DebugOutput)
+                {
+                    Console.WriteLine("You died");
+                }
                 this.SetColor(this.BombColors);
                 this.IsExploded = true;
             }
@@ -139,7 +143,10 @@ namespace Minesweeper
         }
         public void FlagAsBomb()
         {
-            Console.WriteLine("flagged as bomb. index " + this.MyIndex);
+            if(this.gameContext.DebugOutput)
+            {
+                Console.WriteLine("flagged as bomb. index " + this.MyIndex);
+            }
             this.IsFlaggedAsBomb = true;
             this.SetColor(this.FlaggedColors);
         }

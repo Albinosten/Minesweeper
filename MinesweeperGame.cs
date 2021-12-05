@@ -118,7 +118,8 @@ namespace Minesweeper
             }
             if(this.SimmulateOnly)
             {
-                if(this.TileHandler.GetNumberOfBombLeft(this.GameContext)==0)
+                var aaa = (this.TileHandler.GetNumberOfBombLeft(this.GameContext));
+                if(!(aaa > decimal.Zero))
                 {
                     Console.WriteLine("End of sim, bombs wrongly exploded is: " + this.MenuBar.GetDeathScore(this.TileHandler.NumberOfDeaths(), this.GameContext.NumberOfBombs) + " %");
                     this.Exit();

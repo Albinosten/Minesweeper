@@ -11,18 +11,23 @@ namespace Minesweeper
             {
                 Height = 20,
                 Width = 30,
+                DebugOutput = false,
             };
             var bombFactor = 0.25f;
 
             gameContext.NumberOfBombs = (int)(gameContext.Width * gameContext.Height * bombFactor);
         
             var dependencyInjector = new DependencyInjector();
-            using (var game = dependencyInjector.Resolve<MinesweeperGame>())
+
+            for(int i = 0; i < 10; i++)
             {
-                game.GameContext = gameContext;
-                //game.DebugUpdateAllTiles = true;
-                // game.SimmulateOnly = true;
-                game.Run();
+                using (var game = dependencyInjector.Resolve<MinesweeperGame>())
+                {
+                    game.GameContext = gameContext;
+                    //game.DebugUpdateAllTiles = true;
+                    game.SimmulateOnly = true;
+                    game.Run();
+                }
             }
         }
     }
