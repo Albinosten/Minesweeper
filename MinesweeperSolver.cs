@@ -6,18 +6,34 @@ namespace Minesweeper
 {
     public class MinesweeperSolverFactory
     {
-        public MinesweeperSolver Create(ITileHandler tileHandler)
+        //Todo when dep.inj can handle interface, this might be removed.
+
+        private MinesweeperSolverUsingCluster minesweeperSolverUsingCluster;
+        public MinesweeperSolverFactory(MinesweeperSolverUsingCluster minesweeperSolverUsingCluster)
         {
-            return new MinesweeperSolver(tileHandler);
+            this.minesweeperSolverUsingCluster = minesweeperSolverUsingCluster;
         }
+        public IMinesweeperSolver Create(ITileHandler tileHandler, GameContext gameContext)
+        {
+            
+            return new MinesweeperSolver(tileHandler, this.minesweeperSolverUsingCluster);
+        }
+        
     }
 
-    public class MinesweeperSolver
+
+    public interface IMinesweeperSolver
     {
-        ITileHandler TileHandler;
-        public MinesweeperSolver(ITileHandler tileHandler)
+        void SolveNext(GameContext gameContext);
+    }
+    public class MinesweeperSolver : IMinesweeperSolver
+    {
+        private ITileHandler TileHandler;
+        private MinesweeperSolverUsingCluster minesweeperSolverUsingCluster;
+        public MinesweeperSolver(ITileHandler tileHandler, MinesweeperSolverUsingCluster minesweeperSolverUsingCluster)
         {
             this.TileHandler = tileHandler;   
+            this.minesweeperSolverUsingCluster = minesweeperSolverUsingCluster;
         }
         public void SolveNext(GameContext gameContext)
         {
@@ -52,64 +68,51 @@ namespace Minesweeper
                     Console.WriteLine("totaly safe tile: " + totalySafeTile.GetProbabilityToBeABomb());
                 }
                 this.TileHandler.SelectTile(totalySafeTile);
-                // totalySafeTile.Select();
             }
             else
             {
-                var bombsLeft = (decimal)this.TileHandler.GetNumberOfBombLeft(gameContext);
-                var probabilityOfRandomTile = 100 * (bombsLeft /this.DontDivideByZero( allHiddenTiles.Count()));
-                
-                var lowestProbabilityTile = relevantTiles
-                    .Where(x => x.GetProbabilityToBeABomb().HasValue)
-                    .OrderBy(x => x.GetProbabilityToBeABomb())
-                    .FirstOrDefault();
-
-                if(probabilityOfRandomTile < (lowestProbabilityTile?.GetProbabilityToBeABomb() ?? 100))
+                //om man inte hittar något totaly safe så kan det vara dags för att 
+                //räkna ut baserat på potentiella utfall
+/* bra exempel på utfal som behöver räkna ut baseat på grannar
+height = 5
+width = 8
+27
+29
+31
+33
+35
+*/
+/*
+height = 2
+width = 3
+3
+5
+*/
+                if(gameContext.UseNewSolver)
                 {
-                    if(gameContext.DebugOutput)
-                    {
-                        Console.WriteLine("Jumping to a random tile with probability: " + probabilityOfRandomTile);
-                    }
-
-                    // var tiles = this.TileHandler
-                    //     .GetTilesInterface()
-                    //     .Where(x => !x.GetProbabilityToBeABomb().HasValue)
-                    //     .Where(x => !x.IsFlaggedAsBomb)
-                    //     .Where(x => !x.IsToggled)
-                    //     .ToList();
-                    var tiles = allHiddenTiles;
-
-                    if(tiles.Any())//DEnna blir tom ibland, även fast det blir en probabilityOfRandomTile. 
-                    //anledningen är att denna filtrerar bort för många. alternativt att den räkar ut probabilityn för högt
-                    {
-                        // tile.Select();
-                        var tile = this.GetRandomTile(tiles);
-                        this.TileHandler.SelectTile(tile);
-                    }
-                    else
-                    {
-                        Console.WriteLine("hittade ingen random tile. probability = " + probabilityOfRandomTile);
-                        this.SelectLowestProbabilityTile(gameContext, lowestProbabilityTile);
-                    }
-
-
+                    this.minesweeperSolverUsingCluster.SolveNext(gameContext);
                 }
                 else
                 {
-                    //lowest probabilityTile
-                    this.SelectLowestProbabilityTile(gameContext, lowestProbabilityTile);
+                    var bombsLeft = (decimal)this.TileHandler.GetNumberOfBombLeft(gameContext);
+                    var probabilityOfRandomTile = 100 * (bombsLeft / this.DontDivideByZero(allHiddenTiles.Count()));
+                    
+                    foreach(var a in allHiddenTiles)//dålig prestanda att sätta på alla och sedan hämta ut.
+                    //kanske kan göras när man räknar ut vanliga.
+                    {
+                        a.SetProbabilityOfRandom((int)probabilityOfRandomTile);
+                    }
+
+                    var lowestProbabilityTile = relevantTiles
+                        .Where(x => x.GetProbabilityToBeABomb().HasValue)
+                        .OrderBy(x => x.GetProbabilityToBeABomb())
+                        .First();
+                        // .FirstOrDefault();
+
+                    Console.WriteLine("probability on selected: " + lowestProbabilityTile.GetProbabilityToBeABomb());
+                    this.TileHandler.SelectTile(lowestProbabilityTile);
                 }
             }
-        }
-        private void SelectLowestProbabilityTile(GameContext gameContext, ITile lowestProbabilityTile)
-        {
-            if(gameContext.DebugOutput)
-            {
-                Console.WriteLine("lowest probability tile with probability: " + lowestProbabilityTile.GetProbabilityToBeABomb());
-            }
-
-            // lowestProbabilityTile.Select();
-            this.TileHandler.SelectTile(lowestProbabilityTile);
         }
         private decimal DontDivideByZero(decimal value)
         {
@@ -133,7 +136,7 @@ namespace Minesweeper
                 foreach(var tileIndex in tile.NeighbourIndexes)
                 {
                     var neighbourTile = allTiles[tileIndex];
-                    if(!neighbourTile.IsToggled && !neighbourTile.IsFlaggedAsBomb)
+                    if(!neighbourTile.IsToggled && !neighbourTile.IsFlaggedAsBomb && !neighbourTile.IsExploded)
                     {
                         hiddenNeighbours.Add(neighbourTile);
                     }
@@ -146,15 +149,21 @@ namespace Minesweeper
                 foreach(var neighbour in hiddenNeighbours)
                 {
                     var a = 100*(numberOfBombNeighbours / hiddenNeighbours.Count);
+
+                    if(a<decimal.Zero)
+                    {
+                        //False set
+                    }
+
                     neighbour.SetProbabilityToBeABomb((int)a);
-                    if(a > 99)
-                    {
-                        neighbour.FlagAsBomb();
-                    }
-                    if(a < 1)
-                    {
-                        neighbour.MarkAsTotalySafe();
-                    }
+                    // if(a > 99)
+                    // {
+                    //     neighbour.FlagAsBomb();
+                    // }
+                    // if(a < 1)
+                    // {
+                    //     neighbour.MarkAsTotalySafe();
+                    // }
                 }
             }
         }

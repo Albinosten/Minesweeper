@@ -10,6 +10,9 @@ namespace Minesweeper
     {
         int GetNumberOfBombLeft(GameContext context);
         IEnumerable<ITile> GetTilesInterface();
+        IEnumerable<ITile> GetAllNeighbours(ITile tile);
+        IEnumerable<ITile> GetUnknownTiles();
+        IEnumerable<ITile> GetKnownTiles();
         void SelectTile(ITile tile);
     }
     public class TileHandler : ITileHandler
@@ -25,6 +28,7 @@ namespace Minesweeper
         }
         public void CreateTiles(GameContext context, GraphicsDeviceManager graphics, int menuHeight)
         {
+            this.checkedIndexes.Clear();
             this.tiles = this.TileCreator.CreateTiles(context, graphics, menuHeight);
         }
         public void SelectTile(int xPos, int yPos,GameContext context)
@@ -46,11 +50,11 @@ namespace Minesweeper
         {
             this.SelectTile((Tile)tile);
         }
-        public void SelectTile(Tile tile)
+
+        private void SelectTileInternal(Tile tile)
         {
             tile.Select();
-
-            if(tile.NumberOfBombNeighbours == 0 && !tile.IsBomb)
+            if(tile.NumberOfBombNeighbours == decimal.Zero && !tile.IsBomb)
             {
                 foreach(var neighbourIndex in tile.NeighbourIndexes)
                 {
@@ -61,13 +65,27 @@ namespace Minesweeper
                         neighbour.Select();
                         this.checkedIndexes.Add(neighbourIndex);
 
-                        if(neighbour.NumberOfBombNeighbours==0)
+                        if(neighbour.NumberOfBombNeighbours == decimal.Zero)
                         {
-                            this.SelectTile(neighbour);
+                            this.SelectTileInternal(neighbour);
                         }
                     }
                 }
             }
+        }
+
+        public void SelectTile(Tile tile)
+        {
+            this.SelectTileInternal(tile);
+
+            if(tile.IAmFromRandom)
+            {
+                Console.WriteLine("Iwas from random");
+            }
+        }
+        private void Reset()
+        {
+            this.checkedIndexes.Clear();
         }
 
         private List<int> checkedIndexes;
@@ -97,6 +115,25 @@ namespace Minesweeper
         public IEnumerable<ITile> GetTilesInterface()
         {
             return this.tiles;
+        }
+        public IEnumerable<ITile> GetAllNeighbours(ITile tile)
+        {
+            var neighbours = new List<ITile>();
+            foreach(var index in tile.NeighbourIndexes)
+            {
+                var neighbour = this.tiles[index];
+
+                neighbours.Add(neighbour);
+            }
+            return neighbours;
+        }
+        public IEnumerable<ITile> GetUnknownTiles()
+        {
+            return this.tiles.Where(x => !x.IsToggled && !x.IsFlaggedAsBomb && !x.IsExploded);
+        }
+        public IEnumerable<ITile> GetKnownTiles()
+        {
+            return this.tiles.Where(x => x.IsToggled || x.IsFlaggedAsBomb || x.IsExploded);
         }
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont spriteFont)
         {

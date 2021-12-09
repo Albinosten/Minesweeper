@@ -15,16 +15,21 @@ namespace Minesweeper
         public TileHandler TileHandler{get;private set;}
         public MenuBarFactory MenuBarFactory {get;private set;}
         public MenuBar MenuBar {get;private set;}
-        public MinesweeperSolverFactory MinesweeperSolverFactory{get;private set;}
-        public MinesweeperSolver MinesweeperSolver {get;private set;}
+        public MinesweeperSolverFactory MinesweeperSolverFactory {get;private set;}
+        public IMinesweeperSolver MinesweeperSolver {get;private set;}
+        public GameLoader GameLoader{get;private set;}
 
         public GameContext GameContext {get; set;}
-        // private static float s_LockedTime => 0.2f;
-        private static float s_LockedTime => 0f;
+        private static float s_LockedTime => 0.4f;
+        // private static float s_LockedTime => 0f;
         public bool DebugUpdateAllTiles{get;set;}
         public bool SimmulateOnly{get;set;}
         
-        public MinesweeperGame(TileHandler tileHandler, MenuBarFactory menuBarFactory,MinesweeperSolverFactory minesweeperSolverFactory)
+        public MinesweeperGame(TileHandler tileHandler
+            , MenuBarFactory menuBarFactory
+            , MinesweeperSolverFactory minesweeperSolverFactory
+            , GameLoader gameLoader
+            )
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -33,13 +38,13 @@ namespace Minesweeper
             this.TileHandler = tileHandler;
             this.MenuBarFactory = menuBarFactory;
             this.MinesweeperSolverFactory = minesweeperSolverFactory;
+            this.GameLoader = gameLoader;
         }
-
         protected override void Initialize()
         {
             this.MenuBar = this.MenuBarFactory.Create(this.GameContext, this._graphics);
             this.TileHandler.CreateTiles(this.GameContext, this._graphics, MenuBar.s_Height);
-            this.MinesweeperSolver = this.MinesweeperSolverFactory.Create(this.TileHandler);
+            this.MinesweeperSolver = this.MinesweeperSolverFactory.Create(this.TileHandler, this.GameContext);
 
             if(!this.SimmulateOnly)
             {
@@ -72,11 +77,26 @@ namespace Minesweeper
             }
             if (Keyboard.GetState().IsKeyDown(Keys.R))
             {
+                this.GameContext.LoadBombs = false;
                 this.Initialize();
             }
             if (Keyboard.GetState().IsKeyDown(Keys.P))
             {
                 this.TileHandler.ToggleAll();
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S)) //Save map
+            {
+                var bombs = this.TileHandler
+                    .GetTiles()
+                    .Where(x => x.IsBomb)
+                    .Select(s => s.MyIndex)
+                    .ToList();
+                this.GameLoader.SaveResult(bombs);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.L)) //Load map
+            {
+                this.GameContext.LoadBombs = true;
+                this.Initialize();
             }
             if (Keyboard.GetState().IsKeyDown(Keys.H))
             {
@@ -118,7 +138,7 @@ namespace Minesweeper
             }
             if(this.SimmulateOnly)
             {
-                var aaa = (this.TileHandler.GetNumberOfBombLeft(this.GameContext));
+                var aaa = this.TileHandler.GetNumberOfBombLeft(this.GameContext);
                 if(!(aaa > decimal.Zero))
                 {
                     Console.WriteLine("End of sim, bombs wrongly exploded is: " + this.MenuBar.GetDeathScore(this.TileHandler.NumberOfDeaths(), this.GameContext.NumberOfBombs) + " %");

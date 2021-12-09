@@ -33,7 +33,8 @@ namespace Minesweeper
                 }
             }
 
-             result.Remove(this.GetRealIndex(xPos,yPos, gameContext));
+            //remove self from neighbours
+            result.Remove(this.GetRealIndex(xPos,yPos, gameContext));
 
              return result;
         }

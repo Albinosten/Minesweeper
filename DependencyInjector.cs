@@ -7,64 +7,88 @@ using System.Security;
 
 namespace Minesweeper
 {
-    public class DependencyInjector
+   public class DependencyInjector
     {
-        public T Resolve<T>()
+        private Dictionary<Type, object> units;
+
+        public DependencyInjector()
         {
-            return  (T)this.Create(typeof(T));
+            this.units = new Dictionary<Type, object>();
         }
-        private object Create(Type type)
-        {
-            var results = new List<object>();
 
-            try
-            {
-                //Console.WriteLine($"working on {type.Name} ");
-
-                ConstructorInfo[] constructorInfoObjs = type.GetConstructors();
-                if(constructorInfoObjs != null)
+           public T Resolve<T>()
+           {
+               return  (T)this.Create(typeof(T));
+           }
+           private object Create(Type type)
+           {
+                var results = new List<object>();
+                
+                if(this.units.TryGetValue(type, out var result))
                 {
-                    //Console.WriteLine($"The constructor of {type.Name} is: ");
-                    foreach(var constructorInfoObj in constructorInfoObjs)
+                    Console.WriteLine($"returned stored type : " + type);
+
+                    return result;
+                }
+
+                try
+                {
+                    Console.WriteLine($"working on {type.Name} ");
+
+                    ConstructorInfo[] constructorInfoObjs = type.GetConstructors();
+                    if(constructorInfoObjs != null)
                     {
-                        var parameters = constructorInfoObj.GetParameters();
-                        
-                        var parameterObjects = new List<Object>();
-                        foreach(var parameter in parameters)
+                        Console.WriteLine($"The constructor of {type.Name} is: ");
+                        foreach(var constructorInfoObj in constructorInfoObjs)
                         {
-                            //Console.WriteLine(parameter.ParameterType);
+                            var parameters = constructorInfoObj.GetParameters();
+                            
+                            var parameterObjects = new List<Object>();
+                            foreach(var parameter in parameters)
+                            {
+                                Console.WriteLine(parameter.ParameterType);
 
-                            var parameterObject = this.Create(parameter.ParameterType);
-                            parameterObjects.Add(parameterObject);
+                                var parameterObject = this.Create(parameter.ParameterType);
+
+                                parameterObjects.Add(parameterObject);
+                            }
+                            results.Add(constructorInfoObj.Invoke(parameterObjects.ToArray()));
+
+                            Console.WriteLine(constructorInfoObj.ToString());
                         }
-                        results.Add(constructorInfoObj.Invoke(parameterObjects.ToArray()));
-
-                        //Console.WriteLine(constructorInfoObj.ToString());
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Could not find constructor for type {type.Name}");
                     }
                 }
-                else
+                catch(ArgumentNullException e)
                 {
-                    Console.WriteLine($"Could not find constructor for type {type.Name}");
+                    Console.WriteLine("ArgumentNullException: " + e.Message);
                 }
-            }
-            catch(ArgumentNullException e)
+                catch(ArgumentException e)
+                {
+                    Console.WriteLine("ArgumentException: " + e.Message);
+                }
+                catch(SecurityException e)
+                {
+                    Console.WriteLine("SecurityException: " + e.Message);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Exception: " + e.Message);
+                }
+
+
+            result = results.FirstOrDefault(x => x != null);
+            this.units.TryAdd(type, result);
+
+            if(result == null)
             {
-                Console.WriteLine("ArgumentNullException: " + e.Message);
-            }
-            catch(ArgumentException e)
-            {
-                Console.WriteLine("ArgumentException: " + e.Message);
-            }
-            catch(SecurityException e)
-            {
-                Console.WriteLine("SecurityException: " + e.Message);
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
+                
             }
 
-            return results.FirstOrDefault();
+            return result;
         }
     }
 }

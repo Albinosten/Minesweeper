@@ -10,9 +10,11 @@ namespace Minesweeper
         bool IsFlaggedAsBomb { get; }
         bool IsExploded { get; }
         bool IsToggled { get; }
+        bool IsKnown {get;}
         decimal GetNumberOfBombNeighbours();
         decimal? GetProbabilityToBeABomb();
         void SetProbabilityToBeABomb(int percentile);
+        void SetProbabilityOfRandom(int percentile);
         void SetNumberOfBombNeighbours(int number);
         void InitializeBomb();
         void Select();
@@ -22,12 +24,13 @@ namespace Minesweeper
         IList<int> NeighbourIndexes{get;}
         int MyIndex {get;set;}
 
+        ITile Clone();
     }
 
     public class Tile : ITile
     {
-        public static int s_width => 25;
-        public static int s_Height => 25;
+        public static int s_width => 85;
+        public static int s_Height => 85;
         public float XPos => this.Rectangle.XPos;
         public float YPos => this.Rectangle.YPos;
         private IPositionalTexture2D Rectangle;
@@ -44,7 +47,7 @@ namespace Minesweeper
         public bool IsExploded { get; private set; }
         public bool IsToggled {get; private set;}
         public bool IsBomb {get; private set;}
-
+        public bool IsKnown => this.IsExploded || this.IsToggled || this.IsFlaggedAsBomb;
         public IList<int> NeighbourIndexes{get;set;}
         public int MyIndex {get;set;}
         public int NumberOfBombNeighbours {get;set;}
@@ -55,7 +58,25 @@ namespace Minesweeper
             {
                 this.ProbabilityToBeABomb = percentile;
             }
+
+            if(percentile > 99)
+            {
+                this.FlagAsBomb();
+            }
+            if(percentile < 1)
+            {
+                this.MarkAsTotalySafe();
+            }
+
+            this.IAmFromRandom = false;
         }
+        public void SetProbabilityOfRandom(int percentile)
+        {
+            this.SetProbabilityToBeABomb(percentile);
+
+            this.IAmFromRandom = true;
+        }
+        public bool IAmFromRandom {get;private set;}
         private bool totalySafe;
         public void MarkAsTotalySafe()
         {
@@ -80,6 +101,19 @@ namespace Minesweeper
         public Tile(GraphicsDeviceManager graphics)
         {
             this.graphics = graphics;
+        }
+
+        protected Tile(Tile tile)
+        {
+            this.IsFlaggedAsBomb = tile.IsFlaggedAsBomb;
+            this.IsToggled = tile.IsToggled;
+            this.IsExploded = tile.IsExploded;
+            this.IsBomb = tile.IsBomb;
+            this.MyIndex = tile.MyIndex;
+            this.NeighbourIndexes = tile.NeighbourIndexes;
+            
+            this.NumberOfBombNeighbours = tile.NumberOfBombNeighbours;
+            // this.graphics = tile.graphics;//not needed
         }
         public void Initialize(int startY, int startX, int yOffset, GameContext gameContext)
         {
@@ -215,6 +249,12 @@ namespace Minesweeper
             }
 
             return option;
+        }
+        public ITile Clone()
+        {
+            var clone = new Tile(this);
+
+            return clone;
         }
     }
 }

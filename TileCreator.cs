@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System.Linq;
 
 namespace  Minesweeper
@@ -15,9 +13,11 @@ namespace  Minesweeper
     public class TileCreator
     {
         private TileNeighbourCounter tileNeighbourCounter;
-        public TileCreator(TileNeighbourCounter tileNeighbourCounter)
+        private GameLoader gameLoader;
+        public TileCreator(TileNeighbourCounter tileNeighbourCounter, GameLoader gameLoader)
         {
             this.tileNeighbourCounter = tileNeighbourCounter;
+            this.gameLoader = gameLoader;
         }
         public IList<Tile> CreateTiles(GameContext context, GraphicsDeviceManager graphics, int menuHeight)
         {
@@ -73,6 +73,18 @@ namespace  Minesweeper
             return result;
         }
 
+
+        public IEnumerable<ITile> CloneTiles(IList<ITile> tiles)
+        {
+            var result = new List<ITile>(tiles.Count);
+            foreach(var tile in tiles)
+            {
+                result.Add(tile.Clone());
+            }
+
+            return result;
+        }
+
         private Color[] GetColorsWithBorders(int width, int height, ColorOption colorOption)
         {
             Color[] data = new Color[width*height];
@@ -118,13 +130,21 @@ namespace  Minesweeper
             return data;
         }
 
-        private IList<int> GetIndexOfBombs (GameContext gameContext)
+        private IList<int> GetIndexOfBombs(GameContext gameContext)
         {
-            var result = new List<int>(gameContext.NumberOfBombs);
-            var exceptionList = new List<int>();
-            for(int i = 0; i < gameContext.NumberOfBombs; i++)
+            IList<int> result = new List<int>(gameContext.NumberOfBombs);
+
+            if(gameContext.LoadBombs)
             {
-                result.Add(this.GetRandomNumber(gameContext.Height*gameContext.Width, exceptionList));
+                result = this.gameLoader.LoadResult();
+            }
+            else
+            {
+                var exceptionList = new List<int>();
+                for(int i = 0; i < gameContext.NumberOfBombs; i++)
+                {
+                    result.Add(this.GetRandomNumber(gameContext.Height*gameContext.Width, exceptionList));
+                }
             }
             return result;
         }
