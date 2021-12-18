@@ -2,8 +2,9 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 using System.Linq;
+using MinesweeperSolver;
+using Minesweeper;
 
 namespace Minesweeper
 {
@@ -15,7 +16,7 @@ namespace Minesweeper
         public TileHandler TileHandler{get;private set;}
         public MenuBarFactory MenuBarFactory {get;private set;}
         public MenuBar MenuBar {get;private set;}
-        public MinesweeperSolverFactory MinesweeperSolverFactory {get;private set;}
+        // public MinesweeperSolverFactory MinesweeperSolverFactory {get;private set;}
         public IMinesweeperSolver MinesweeperSolver {get;private set;}
         public GameLoader GameLoader{get;private set;}
 
@@ -27,7 +28,8 @@ namespace Minesweeper
         
         public MinesweeperGame(TileHandler tileHandler
             , MenuBarFactory menuBarFactory
-            , MinesweeperSolverFactory minesweeperSolverFactory
+            // , MinesweeperSolverFactory minesweeperSolverFactory
+            , MinesweeperSolver.MinesweeperSolver minesweeperSolver
             , GameLoader gameLoader
             )
         {
@@ -37,14 +39,15 @@ namespace Minesweeper
 
             this.TileHandler = tileHandler;
             this.MenuBarFactory = menuBarFactory;
-            this.MinesweeperSolverFactory = minesweeperSolverFactory;
+            // this.MinesweeperSolverFactory = minesweeperSolverFactory;
+            this.MinesweeperSolver = minesweeperSolver;
             this.GameLoader = gameLoader;
         }
         protected override void Initialize()
         {
             this.MenuBar = this.MenuBarFactory.Create(this.GameContext, this._graphics);
             this.TileHandler.CreateTiles(this.GameContext, this._graphics, MenuBar.s_Height);
-            this.MinesweeperSolver = this.MinesweeperSolverFactory.Create(this.TileHandler, this.GameContext);
+            // this.MinesweeperSolver = this.MinesweeperSolverFactory.Create(this.TileHandler, this.GameContext);
 
             if(!this.SimmulateOnly)
             {

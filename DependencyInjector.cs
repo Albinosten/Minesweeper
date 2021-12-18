@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Security;
 
 
-namespace Minesweeper
+namespace DependencyInjector
 {
    public class DependencyInjector
     {

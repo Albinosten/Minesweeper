@@ -1,25 +1,26 @@
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using Minesweeper;
 
-namespace Minesweeper
+namespace MinesweeperSolver
 {
-    public class MinesweeperSolverFactory
-    {
-        //Todo when dep.inj can handle interface, this might be removed.
+    // public class MinesweeperSolverFactory
+    // {
+    //     //Todo when dep.inj can handle interface, this might be removed.
 
-        private MinesweeperSolverUsingCluster minesweeperSolverUsingCluster;
-        public MinesweeperSolverFactory(MinesweeperSolverUsingCluster minesweeperSolverUsingCluster)
-        {
-            this.minesweeperSolverUsingCluster = minesweeperSolverUsingCluster;
-        }
-        public IMinesweeperSolver Create(ITileHandler tileHandler, GameContext gameContext)
-        {
+    //     private MinesweeperSolverUsingCluster minesweeperSolverUsingCluster;
+    //     public MinesweeperSolverFactory(MinesweeperSolverUsingCluster minesweeperSolverUsingCluster)
+    //     {
+    //         this.minesweeperSolverUsingCluster = minesweeperSolverUsingCluster;
+    //     }
+    //     public IMinesweeperSolver Create(TileHandler tileHandler, GameContext gameContext)
+    //     {
             
-            return new MinesweeperSolver(tileHandler, this.minesweeperSolverUsingCluster);
-        }
+    //         return new MinesweeperSolver(tileHandler, this.minesweeperSolverUsingCluster);
+    //     }
         
-    }
+    // }
 
 
     public interface IMinesweeperSolver
@@ -30,10 +31,15 @@ namespace Minesweeper
     {
         private ITileHandler TileHandler;
         private MinesweeperSolverUsingCluster minesweeperSolverUsingCluster;
-        public MinesweeperSolver(ITileHandler tileHandler, MinesweeperSolverUsingCluster minesweeperSolverUsingCluster)
+        private BombProbabilityCalculator bombProbabilityCalculator;
+        public MinesweeperSolver(TileHandler tileHandler
+            , MinesweeperSolverUsingCluster minesweeperSolverUsingCluster
+            , BombProbabilityCalculator bombProbabilityCalculator
+            )
         {
             this.TileHandler = tileHandler;   
             this.minesweeperSolverUsingCluster = minesweeperSolverUsingCluster;
+            this.bombProbabilityCalculator = bombProbabilityCalculator;
         }
         public void SolveNext(GameContext gameContext)
         {
@@ -52,7 +58,7 @@ namespace Minesweeper
             this.ResetCalculatedProbability();
 
             //calculate probability
-            this.CalculateProbabilityAndMarkAsBomb();
+            this.bombProbabilityCalculator.CalculateProbabilityAndMarkAsBomb();
 
             var relevantTiles = allHiddenTiles 
                 .Where(x => x.GetProbabilityToBeABomb().HasValue)
@@ -122,51 +128,7 @@ width = 3
             }
             return value;
         }        
-        private void CalculateProbabilityAndMarkAsBomb()
-        {
-            var allTiles = this.TileHandler
-                .GetTilesInterface()
-                .ToList();
-
-            foreach(var tile in allTiles.Where(x => x.IsToggled && !x.IsFlaggedAsBomb))
-            {
-                var numberOfBombNeighbours = tile.GetNumberOfBombNeighbours();
-
-                var hiddenNeighbours = new List<ITile>();
-                foreach(var tileIndex in tile.NeighbourIndexes)
-                {
-                    var neighbourTile = allTiles[tileIndex];
-                    if(!neighbourTile.IsToggled && !neighbourTile.IsFlaggedAsBomb && !neighbourTile.IsExploded)
-                    {
-                        hiddenNeighbours.Add(neighbourTile);
-                    }
-                    if(neighbourTile.IsFlaggedAsBomb || neighbourTile.IsExploded)
-                    {
-                        numberOfBombNeighbours--;
-                    }
-                }
-
-                foreach(var neighbour in hiddenNeighbours)
-                {
-                    var a = 100*(numberOfBombNeighbours / hiddenNeighbours.Count);
-
-                    if(a<decimal.Zero)
-                    {
-                        //False set
-                    }
-
-                    neighbour.SetProbabilityToBeABomb((int)a);
-                    // if(a > 99)
-                    // {
-                    //     neighbour.FlagAsBomb();
-                    // }
-                    // if(a < 1)
-                    // {
-                    //     neighbour.MarkAsTotalySafe();
-                    // }
-                }
-            }
-        }
+        
         private void ResetCalculatedProbability()
         {
             foreach(var tile in this.TileHandler.GetTilesInterface())

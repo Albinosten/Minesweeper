@@ -30,7 +30,7 @@ namespace Minesweeper
             var boolList = new List<bool>(countSet);
             for(int i = 0; i< countSet; i++)
             {
-                boolList[i] = i < countSubSet;
+                boolList.Add(i < countSubSet);
             }
 
             return this.GetPer(boolList);
@@ -51,12 +51,12 @@ namespace Minesweeper
                 numberOfPermutation++;
                 results.Add(new List<bool>(list));
 
-                // foreach(var bbb in list)
-                // {
-                //     Console.Write(bbb.ToString() + " ");
+                foreach(var bbb in list)
+                {
+                    Console.Write(bbb);
 
-                // }
-                // Console.WriteLine();
+                }
+                Console.WriteLine();
                 // Console.WriteLine(numberOfPermutation+ " : " +  new String(list.ToString()));
             }
             else

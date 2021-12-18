@@ -11,6 +11,7 @@ namespace Minesweeper
         bool IsExploded { get; }
         bool IsToggled { get; }
         bool IsKnown {get;}
+        bool IAmFakeTile {get;}
         decimal GetNumberOfBombNeighbours();
         decimal? GetProbabilityToBeABomb();
         void SetProbabilityToBeABomb(int percentile);
@@ -18,7 +19,7 @@ namespace Minesweeper
         void SetNumberOfBombNeighbours(int number);
         void InitializeBomb();
         void Select();
-        void FlagAsBomb();
+        void FlagAsBomb(bool setColor = true);
         void MarkAsTotalySafe();
         void ResetProbability();
         IList<int> NeighbourIndexes{get;}
@@ -29,8 +30,8 @@ namespace Minesweeper
 
     public class Tile : ITile
     {
-        public static int s_width => 85;
-        public static int s_Height => 85;
+        public static int s_width => 25;
+        public static int s_Height => 25;
         public float XPos => this.Rectangle.XPos;
         public float YPos => this.Rectangle.YPos;
         private IPositionalTexture2D Rectangle;
@@ -46,6 +47,7 @@ namespace Minesweeper
         public  Color[] DarkRedColors{ get; set; }
         public bool IsExploded { get; private set; }
         public bool IsToggled {get; private set;}
+        public bool IAmFakeTile{get;set;}
         public bool IsBomb {get; private set;}
         public bool IsKnown => this.IsExploded || this.IsToggled || this.IsFlaggedAsBomb;
         public IList<int> NeighbourIndexes{get;set;}
@@ -54,7 +56,11 @@ namespace Minesweeper
         private int? ProbabilityToBeABomb{get;set;}
         public void SetProbabilityToBeABomb(int percentile)
         {
-            if(this.ProbabilityToBeABomb < percentile || !this.ProbabilityToBeABomb.HasValue)
+            if(this.ProbabilityToBeABomb < percentile || !this.ProbabilityToBeABomb.HasValue && percentile > decimal.Zero)
+            {
+                this.ProbabilityToBeABomb = percentile;
+            }
+            else if(percentile < decimal.Zero)
             {
                 this.ProbabilityToBeABomb = percentile;
             }
@@ -111,6 +117,7 @@ namespace Minesweeper
             this.IsBomb = tile.IsBomb;
             this.MyIndex = tile.MyIndex;
             this.NeighbourIndexes = tile.NeighbourIndexes;
+            this.gameContext = tile.gameContext;
             
             this.NumberOfBombNeighbours = tile.NumberOfBombNeighbours;
             // this.graphics = tile.graphics;//not needed
@@ -175,14 +182,17 @@ namespace Minesweeper
                 this.SetColor( this.IsFlaggedAsBomb ? this.FlaggedColors: this.NormalColors);
             }
         }
-        public void FlagAsBomb()
+        public void FlagAsBomb(bool setColor = true)
         {
             if(this.gameContext.DebugOutput)
             {
                 Console.WriteLine("flagged as bomb. index " + this.MyIndex);
             }
             this.IsFlaggedAsBomb = true;
-            this.SetColor(this.FlaggedColors);
+            if(setColor)
+            {
+                this.SetColor(this.FlaggedColors);
+            }
         }
 
         public void InitializeBomb()
@@ -253,6 +263,7 @@ namespace Minesweeper
         public ITile Clone()
         {
             var clone = new Tile(this);
+            clone.IAmFakeTile = true;
 
             return clone;
         }
