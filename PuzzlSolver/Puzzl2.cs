@@ -5,7 +5,11 @@ namespace AdventOfCode
 {
     public class Puzzl2 : IPuzzle
     {
+        //2036120
         public static string path => "PuzzlInput/2.txt";
+
+        public int FirstResult => 2036120;
+        public long SecondResult => 2015547716;
 
         public int Solve()
         {
@@ -34,7 +38,7 @@ namespace AdventOfCode
 
             return forward * debth;
         }
-        public int SolveNext()
+        public long SolveNext()
         {
             var forward = 0;
             var debth = 0;

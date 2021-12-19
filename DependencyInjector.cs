@@ -16,6 +16,10 @@ namespace DependencyInjector
             this.units = new Dictionary<Type, object>();
         }
 
+        public T Resolve<T>(Type type)
+        {
+            return (T)this.Create(type);
+        }
            public T Resolve<T>()
            {
                return  (T)this.Create(typeof(T));

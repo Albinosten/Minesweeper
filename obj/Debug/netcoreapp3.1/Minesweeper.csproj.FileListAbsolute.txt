@@ -1,3 +1,4 @@
+/Users/albinost/Programming/Minesweeper/bin/Debug/netcoreapp3.1/Content/Fonts/Font.xnb
 /Users/albinost/Programming/Minesweeper/bin/Debug/netcoreapp3.1/Minesweeper.deps.json
 /Users/albinost/Programming/Minesweeper/bin/Debug/netcoreapp3.1/Minesweeper.runtimeconfig.json
 /Users/albinost/Programming/Minesweeper/bin/Debug/netcoreapp3.1/Minesweeper.runtimeconfig.dev.json
@@ -20,4 +21,3 @@
 /Users/albinost/Programming/Minesweeper/obj/Debug/netcoreapp3.1/Minesweeper.dll
 /Users/albinost/Programming/Minesweeper/obj/Debug/netcoreapp3.1/Minesweeper.pdb
 /Users/albinost/Programming/Minesweeper/obj/Debug/netcoreapp3.1/Minesweeper.genruntimeconfig.cache
-/Users/albinost/Programming/Minesweeper/bin/Debug/netcoreapp3.1/Content/Fonts/Font.xnb

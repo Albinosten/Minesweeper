@@ -64,63 +64,33 @@ namespace Minesweeper
                 }
             }
 
-            SolvePuzzlz(dependencyInjector);
+            SolveAllPuzzle(dependencyInjector);
         }
 
-        public static void SolvePuzzlz(DependencyInjector.DependencyInjector dependencyInjector)
+        public static void SolveAllPuzzle(DependencyInjector.DependencyInjector dependencyInjector)
         {
-            IPuzzle puzzlSolver = dependencyInjector.Resolve<Puzzl1>();
-            /*************************/
-            // Console.WriteLine("Puzzl1");
+            IPuzzle puzzlSolver = null;
+
+            var objects = new []
+            {
+                // typeof(Puzzl1),
+                // typeof(Puzzl2),
+                // typeof(Puzzl3),
+                // typeof(Puzzl4),
+                // typeof(Puzzl5),
+                // typeof(Puzzl6),
+                // typeof(Puzzl7),
+                typeof(Puzzl8),
+            };
+
+            foreach(var obj in objects)
+            {
+                puzzlSolver = dependencyInjector.Resolve<IPuzzle>(obj);
             
-            var puzzlResult = 0;
-            // puzzlResult = puzzlSolver.Solve();
-            // Console.WriteLine("Should be 1162 is : " + puzzlResult); //1162
-
-            // puzzlResult = puzzlSolver.SolveNext();
-            // Console.WriteLine("Should be 1190 is : " + puzzlResult); //1190
-
-            // /*************************/
-            // Console.WriteLine("Puzzl2");
-            // puzzlSolver = dependencyInjector.Resolve<Puzzl2>();
-            
-            // puzzlResult = puzzlSolver.Solve();
-            // Console.WriteLine("Should be 2036120 is : " + puzzlResult); //2036120
-
-            // puzzlResult = puzzlSolver.SolveNext();
-            // Console.WriteLine("Should be 2015547716 is : " + puzzlResult); //2015547716
-
-            // /*************************/
-            // Console.WriteLine("Puzzl3");
-            // puzzlSolver = dependencyInjector.Resolve<Puzzl3>();
-            
-            // puzzlResult = puzzlSolver.Solve();
-            // Console.WriteLine("Should be 2250414 is : " + puzzlResult); //2250414
-
-            // puzzlResult = puzzlSolver.SolveNext();
-            // Console.WriteLine("Should be 6085575 is : " + puzzlResult);//6085575
-
-            // /*************************/
-            // Console.WriteLine("Puzzl4");
-            // puzzlSolver = dependencyInjector.Resolve<Puzzl4>();
-            
-            // puzzlResult = puzzlSolver.Solve();
-            // Console.WriteLine("Should be 34506 is : " + puzzlResult); //34506
-
-            // puzzlResult = puzzlSolver.SolveNext();
-            // Console.WriteLine("Should be 7686 is : " + puzzlResult);//7686
-
-
-            /*************************/
-            Console.WriteLine("Puzzl5");
-            puzzlSolver = dependencyInjector.Resolve<Puzzl5>();
-            
-            puzzlResult = puzzlSolver.Solve();
-            Console.WriteLine("Should be 6666 is : " + puzzlResult); //6666
-
-            puzzlResult = puzzlSolver.SolveNext();
-            Console.WriteLine("Should be 19081 is : " + puzzlResult); //19081
-            
+                Console.WriteLine("First should be " + puzzlSolver.FirstResult + " is : " + puzzlSolver.Solve());
+                Console.WriteLine("Second should be " + puzzlSolver.SecondResult + " is : " + puzzlSolver.SolveNext());
+            }
         }
+       
     }
 }

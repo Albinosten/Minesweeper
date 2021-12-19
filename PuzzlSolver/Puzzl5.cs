@@ -8,7 +8,8 @@ namespace AdventOfCode
     public class Puzzl5 : IPuzzle
     {
         public static string path => "PuzzlInput/5.txt";
-
+        public int FirstResult => 6666;
+        public long SecondResult => 19081;
         public int Solve()
         {
             var lines = File
@@ -101,7 +102,7 @@ namespace AdventOfCode
                 input.y1 = temp;
             }
         }
-        public int SolveNext()
+        public long SolveNext()
         {
             var lines = File
                 .ReadAllLines(path)

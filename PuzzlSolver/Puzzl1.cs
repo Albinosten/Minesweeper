@@ -7,7 +7,13 @@ namespace AdventOfCode
     public class Puzzl1 : IPuzzle
     {
         public static string path => "PuzzlInput/1.txt";
+        public int FirstResult =>  1162;
+        public long SecondResult => 1190;
 
+        public Puzzl1(Puzzl2 asd)
+        {
+            
+        }
         public int Solve()
         {
             var result = 0;
@@ -28,7 +34,7 @@ namespace AdventOfCode
 
             return result;
         }
-        public int SolveNext()
+        public long SolveNext()
         {
             var result = 0;
 

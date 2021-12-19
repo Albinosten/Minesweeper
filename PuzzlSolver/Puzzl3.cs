@@ -9,6 +9,8 @@ namespace AdventOfCode
     {
         public static string path => "PuzzlInput/3.txt";
 
+        public int FirstResult => 2250414;
+        public long SecondResult => 6085575;
         public int Solve()
         {
             var lines = File
@@ -51,7 +53,7 @@ namespace AdventOfCode
             return epsilon * gammaRate;
         }
 
-        public int SolveNext()
+        public long SolveNext()
         {
             IList<string> initialLines = File
                 .ReadAllLines(path)
