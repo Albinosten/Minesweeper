@@ -5,11 +5,11 @@ using System;
 
 namespace AdventOfCode
 {
-    public class Puzzl8 : IPuzzle
+    public class Puzzl9 : IPuzzle
     {
-        public static string path => "PuzzlInput/8.txt";
-        public int FirstResult => 239;
-        public long SecondResult => 946346;
+        public static string path => "PuzzlInput/9.txt";
+        public int FirstResult => 0;
+        public long SecondResult => 0;
         public int Solve()
         {
             var lines = File
