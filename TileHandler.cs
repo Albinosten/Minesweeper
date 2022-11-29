@@ -26,6 +26,16 @@ namespace Minesweeper
             this.tiles = new List<Tile>();
             this.checkedIndexes = new List<int>();
         }
+
+        public TileHandler Clone()
+        {
+            var newTileHandler = new TileHandler(this);
+            return newTileHandler;
+        }
+        private TileHandler(TileHandler tileHandler)
+        {
+         this.tiles = tileHandler.tiles.Select(s => (Tile)s.Clone()).ToList();
+        }
         public void CreateTiles(GameContext context, GraphicsDeviceManager graphics, int menuHeight)
         {
             this.checkedIndexes.Clear();
@@ -34,6 +44,7 @@ namespace Minesweeper
         public void SelectTile(int xPos, int yPos,GameContext context)
         {
             var tile = this.GetSelectedTile(xPos,yPos,context);
+            if(tile == null){return;};
             this.SelectTile(tile);   
             this.checkedIndexes.Clear();
         }
@@ -127,6 +138,8 @@ namespace Minesweeper
             }
             return neighbours;
         }
+
+
         public IEnumerable<ITile> GetUnknownTiles()
         {
             return this.tiles.Where(x => !x.IsToggled && !x.IsFlaggedAsBomb && !x.IsExploded);

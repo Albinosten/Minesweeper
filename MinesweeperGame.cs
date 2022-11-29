@@ -29,7 +29,7 @@ namespace Minesweeper
         public MinesweeperGame(TileHandler tileHandler
             , MenuBarFactory menuBarFactory
             // , MinesweeperSolverFactory minesweeperSolverFactory
-            , MinesweeperSolver.MinesweeperSolver minesweeperSolver
+            , MinesweeperSolver.MinesweeperSolverMk2 minesweeperSolver
             , GameLoader gameLoader
             )
         {
@@ -72,6 +72,13 @@ namespace Minesweeper
             this.spriteFont = this.Content.Load<SpriteFont>("Fonts/Font");
         }
 
+//R reload
+//P toggle al
+//S Save map
+//L load map
+//H use hint, 
+//N use solver new or old based on setting
+// new setting for N //N use solver mk2
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -111,6 +118,7 @@ namespace Minesweeper
                 {
 
                     this.MinesweeperSolver.SolveNext(GameContext);
+                    this.CheckIfDone();
                     this.LockMouseClick();
                 }
 
@@ -123,7 +131,7 @@ namespace Minesweeper
                     var x = mouseState.Position.X;
                     var y = mouseState.Position.Y;
                     this.TileHandler.SelectTile(x,y,this.GameContext);
-
+                    this.CheckIfDone();
                     this.LockMouseClick();
                 }
             }
@@ -135,7 +143,7 @@ namespace Minesweeper
                     var y = mouseState.Position.Y;
                     
                     this.TileHandler.FlagAsBomb(x,y,this.GameContext);
-
+                    this.CheckIfDone();
                     this.LockMouseClick();
                 }
             }
@@ -159,11 +167,36 @@ namespace Minesweeper
                 this.TileHandler.ToggleAll();
             }
 
-            //this.CheckIfDead(); //få tillbaka ett gameState ifrån tileHandlern?
             this.UpdateMouseLock(gameTime);
             base.Update(gameTime);
         }
+private void CheckIfDone()
+{
+    var alldone = this.TileHandler.GetTilesInterface().Where(x => ((Tile)x).IsBomb ).All(x => ((Tile)x).IsFlaggedAsBomb || ((Tile)x).IsExploded);
+    if(alldone && this.TileHandler.GetTilesInterface().All(x => x.IsKnown))
+    {
+        Console.WriteLine("******");
+        Console.WriteLine("******");
+        Console.WriteLine("AllDone");
+        Console.WriteLine("******");
+        Console.WriteLine("******");
+        if (this.TileHandler.GetTilesInterface()
+            .Any(x => x.IsExploded) )
+        {
+            Console.WriteLine("ButYouLoose cause you blew up something");
+            Console.WriteLine("******");
+            Console.WriteLine("******");
+        }
 
+        if (this.TileHandler.GetTilesInterface()
+            .Any(x => x.IsFlaggedAsBomb && !((Tile)x).IsBomb))
+        {
+            Console.WriteLine("ButYouLoose cause you flaged a non bomb");
+            Console.WriteLine("******");
+            Console.WriteLine("******");
+        }
+    }
+}
         private bool isFirstTime = true;
 
         protected override void Draw(GameTime gameTime)

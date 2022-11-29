@@ -50,7 +50,7 @@ namespace MinesweeperSolver
                 }
                 foreach(var neighbour in hiddenNeighbours)
                 {
-                    neighbour.SetProbabilityToBeABomb((int)a);
+                    neighbour.SetProbabilityToBeABomb(a);
                 }
             }
         }
