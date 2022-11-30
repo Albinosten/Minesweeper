@@ -130,6 +130,7 @@ namespace MinesweeperSolver
                     }
                 }
             }
+            Console.WriteLine("Could not solve by cluster");
             return false;
         }
         private static bool ValidatePerfectCombination(IList<ITile> clusterTiles, TileHandler tileHandlerInternal)
