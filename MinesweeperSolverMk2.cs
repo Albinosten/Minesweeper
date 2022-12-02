@@ -78,6 +78,7 @@ namespace MinesweeperSolver
             }
             var maxBombsPerCluster = (numberOfBombsLeft - clusters.Count()) + 1;
 
+
             clusters = this.SplitClusters(clusters);
 
             foreach(var cluster in clusters)
@@ -115,7 +116,10 @@ namespace MinesweeperSolver
             cluster.Add(tile);
             foreach(var neighbour in this.TileHandler.GetAllNeighbours(tile).Where(x => !x.IsKnown && this.TileHandler.GetAllNeighbours(x).Any(n => n.IsKnown)))
             {
-                cluster.Add(neighbour);
+                if(!cluster.Contains(neighbour))
+                {
+                    InsertNewValues(neighbour, cluster);
+                }
             }
             return cluster;
         }
@@ -155,9 +159,12 @@ namespace MinesweeperSolver
                         }
                         if(probability == decimal.Zero)
                         {
-                            //har hänt att jag hamnat hör med tile som är bomb...
                             neighbour.Select();
                             changedAnyTiles = true;
+
+                            
+                            //kan hanmna här om min kluster lösning har hittat en 
+                            //potentiell lösning men som visar sig vara fel
                         }
                     }
                 }
