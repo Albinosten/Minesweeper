@@ -76,9 +76,8 @@ namespace MinesweeperSolver
                     clusters.Add(this.InsertNewValues(tile, new HashSet<ITile>()));
                 }
             }
+
             var maxBombsPerCluster = (numberOfBombsLeft - clusters.Count()) + 1;
-
-
             clusters = this.SplitClusters(clusters);
 
             foreach(var cluster in clusters)
@@ -162,7 +161,6 @@ namespace MinesweeperSolver
                             neighbour.Select();
                             changedAnyTiles = true;
 
-                            
                             //kan hanmna här om min kluster lösning har hittat en 
                             //potentiell lösning men som visar sig vara fel
                         }

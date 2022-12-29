@@ -32,6 +32,7 @@ namespace MinesweeperSolver
 
             var finalResult = new List<Permutation>();
             for(int i = 0; i < totalAmount; i++)
+            // for(int i = (int)totalAmount; i > decimal.Zero; i--)
             {
                 BitArray b = new BitArray(new int[] { i });
                 bool[] bits = new bool[b.Count];
@@ -42,21 +43,12 @@ namespace MinesweeperSolver
                     Number = i+1, 
                     Values = bits.ToList(),
                 };
-                // finalResult.Add(new Permutation
-                // {
-                //     Number = i+1, 
-                //     Values = bits.ToList(),
-                // });
             }
-
-            // return finalResult;
         }
 
         public IList<List<bool>>  GetUniquePer(int countSet, int countSubSet)
         {
-            //Fixa mig unique
             var results = this.GetPer(countSet, countSubSet);
-
             
             var distinctResult = new HashSet<int>();
 

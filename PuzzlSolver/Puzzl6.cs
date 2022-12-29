@@ -11,7 +11,7 @@ namespace AdventOfCode
         public int FirstResult => 375482;
         public long SecondResult => 1689540415957;
         public int Solve()
-        {
+        { 
             var fishes = File
                 .ReadAllLines(path)
                 .ToList()
