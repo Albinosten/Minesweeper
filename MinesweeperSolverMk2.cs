@@ -38,6 +38,7 @@ namespace MinesweeperSolver
             {
                 if (this.CalculateClusterbasedOnNumberOfBombsLeft(gameContext))
                 {
+                    //fucking gissa bara kanske?
                     // this.UnmarkAllFlagged();
                 }
             }

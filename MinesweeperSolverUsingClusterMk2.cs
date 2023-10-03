@@ -24,9 +24,6 @@ namespace MinesweeperSolver
             maxNumberOfBombs = System.Math.Min(maxNumberOfBombs, cluster.Count);
             var possibleCombinations = new Permuterer().GetPerFromNumber(cluster.Count);
             
-           
-
-
             // return LoopThrougParallelPermutations(possibleCombinations, maxNumberOfBombs, cluster, this.tileHandler);
             return this.LoopThroughPermutations(possibleCombinations, maxNumberOfBombs, cluster);
         }
@@ -100,15 +97,16 @@ namespace MinesweeperSolver
              foreach(var combination in possibleCombinations.Where(x => x.Values.Sum(x => x == true ? decimal.One : decimal.Zero) <= maxNumberOfBombs))
             {
                 //cloned tiles so do whatever works;
+                //dont think these are cloned anymore... only cloned in parallell.
                 var tiles = cluster
                     .ToList();
 
                 //set possible permutation
                 for(int i = 0; i < cluster.Count; i++)
                 {
-                    var tile  = tiles[i];
                     if(combination.Values[i])
                     {
+                        var tile  = tiles[i];
                         tile.ToggleRightClick();
                     }
                 }

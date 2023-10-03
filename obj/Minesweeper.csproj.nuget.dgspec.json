@@ -17,14 +17,14 @@
           "/Users/albinost/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "netcoreapp3.1"
+          "net6.0"
         ],
         "sources": {
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "netcoreapp3.1": {
-            "targetAlias": "netcoreapp3.1",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -35,16 +35,12 @@
         }
       },
       "frameworks": {
-        "netcoreapp3.1": {
-          "targetAlias": "netcoreapp3.1",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
-            "MonoGame.Content.Builder.Task": {
-              "target": "Package",
-              "version": "[3.8.0.1641, )"
-            },
             "MonoGame.Framework.DesktopGL": {
               "target": "Package",
-              "version": "[3.8.0.1641, )"
+              "version": "[3.8.1.303, )"
             }
           },
           "imports": [
@@ -53,7 +49,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -62,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.402/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.407/RuntimeIdentifierGraph.json"
         }
       }
     }

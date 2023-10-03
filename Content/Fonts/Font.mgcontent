@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>/Users/albinost/Programming/Minesweeper/Content/Fonts/Font.spritefont</SourceFile>
-  <SourceTime>2021-11-19T13:43:04.0386948+01:00</SourceTime>
-  <DestFile>/Users/albinost/Programming/Minesweeper/Content/bin/DesktopGL/Content/Fonts/Font.xnb</DestFile>
-  <DestTime>2021-11-19T14:14:00.4882809+01:00</DestTime>
+  <SourceTime>2023-03-29T19:56:50.5170523+02:00</SourceTime>
+  <DestFile>/Users/albinost/Programming/Minesweeper/Content/Fonts/Font.xnb</DestFile>
+  <DestTime>2023-04-01T16:10:58.7781252+02:00</DestTime>
   <Importer>FontDescriptionImporter</Importer>
   <ImporterTime>2020-08-10T18:17:54+02:00</ImporterTime>
   <Processor>FontDescriptionProcessor</Processor>
   <ProcessorTime>2020-08-10T18:17:54+02:00</ProcessorTime>
-  <Parameters>
-    <Key>TextureFormat</Key>
-    <Value>Compressed</Value>
-  </Parameters>
   <Dependencies />
   <BuildAsset />
   <BuildOutput />
